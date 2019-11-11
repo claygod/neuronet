@@ -17,6 +17,10 @@ type Dendrite struct {
 	memory *dendriteMemory
 }
 
+func (d *Dendrite) TransmitSignal(sig *Signal) {
+	//TODO: обработка, добавление в память, передача в тело нейрона
+}
+
 /*
 dendriteMemory - память дендрита, хранит последние отрицательные и положительные
 воспоминания и текущий момент.
