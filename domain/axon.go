@@ -65,24 +65,24 @@ func (a *Axon) SendSignalStochastic(sig *Signal) error {
 		}
 	}
 	// подготавливаем список сигналов, среди которых только один будет не пустышкой
-	sigList := a.prepareSignalDoubled(sig, false)
+	sigList := a.prepareSignalDoubled(sig, 0)
 	sigList[neuronTo] = sig
 	return nil
 }
 
-func (a *Axon) prepareSignalDoubled(sig *Signal, weigthCopy bool) map[uint64]*Signal {
+func (a *Axon) prepareSignalDoubled(sig *Signal, level uint64) map[uint64]*Signal {
 	sigList := make(map[uint64]*Signal, len(a.outList))
 	for _, ao := range a.outList {
 		s := &Signal{
 			uid:    sig.uid,
-			level:  sig.level,
+			level:  level,
 			from:   sig.from,
 			to:     ao.neuronId,
-			weigth: 0,
+			weigth: sig.weigth,
 		}
-		if weigthCopy {
-			s.weigth = sig.weigth
-		}
+		// if weigthCopy {
+		// 	s.weigth = sig.weigth
+		// }
 		sigList[ao.neuronId] = s
 	}
 	return sigList
