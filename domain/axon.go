@@ -38,6 +38,7 @@ func (a *Axon) signalBroadcast(sigs []*Signal) {
 /*
 SendSignalStochasticMode - отправка сигнала одному из подключенных к аксону нейронов,
 выбранному случайным стохастическим методом. Это может имитировать любознательность.
+Но рассылка будет всем, просто это будут пустышки. Рассылка всем нужна для синхронизации.
 */
 func (a *Axon) SendSignalStochastic(sig *Signal) error {
 	if len(a.outList) == 0 {

@@ -6,7 +6,7 @@ package domain
 
 type Signal struct {
 	uid   uint64
-	level uint64 // нулевое значение говорит о том, что это пустышка
+	level uint64 // нулевое значение говорит о том, что это пустышка, в остальных случаях он пробрасываясь растёт
 	from  uint64
 	to    uint64
 	// parent *Signal
