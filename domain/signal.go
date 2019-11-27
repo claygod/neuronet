@@ -11,16 +11,16 @@ type Signal struct {
 	to    uint64
 	// parent *Signal
 	// owner  *Neuron
-	weigth int64
+	weight int64 //TODO: вот тут главная кухня, надо разобраться с допустимыми значениями
 }
 
-type SignalAccounter struct {
+type SignalAggregator struct {
 	//TODO: эта структура может быть встроена в ownerNeuron *Neuron
 	claimCount uint64
 	counter    uint64
-	signals    []*Signal
+	signals    []*Signal //количество сигналов должно быть увязано с их местами
 }
 
-func (s *SignalAccounter) AddSignal(sig *Signal) {
+func (s *SignalAggregator) AddSignal(sig *Signal) {
 	//TODO: по накоплению сигналов они передаются в нейрон
 }
