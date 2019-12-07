@@ -36,17 +36,53 @@ type dendriteMemory struct {
 	negativeMemories [][]int64 //mem list
 }
 
+func newDendriteMemory(momentLength int64, memoryLength int64) *dendriteMemory {
+	return &dendriteMemory{
+		//TODO:
+		momentLength: momentLength,
+		memoryLength: memoryLength,
+
+		currentMoment:    make([]int64, momentLength),
+		positiveMemories: make([][]int64, 0, memoryLength),
+		negativeMemories: make([][]int64, 0, memoryLength),
+	}
+}
+
 /*
 addEvent - поступил сигнал от предыдущего нейрона, сигнал надо добавить в память момента на случай
 положительной или отрицательной обратной связи, проверить, есть ли воспоминания на эту тему и усилить
 или наоборот ослабить сигнал.
 */
-func (d *dendriteMemory) addEvent(event int64) {
+func (d *dendriteMemory) addEvent(event int64) int64 {
 	d.m.Lock()
 	defer d.m.Unlock()
 	d.addEventToList(event)
-	//TODO: обработка сигнала (ищем в памяти)
+	//TODO: обработка сигнала (ищем в памяти позитив и негатив)
+	memSum := d.searchInMemory()
 	//TODO: отправка сигнала в агрегатор сигналов нейрона
+	return memSum //TODO: +/- event как-то надо учитывать входной сигнал
+}
+
+func (d *dendriteMemory) searchInMemory() int64 {
+	posRate := d.maxRateFromMemory(d.positiveMemories)
+	negRate := d.maxRateFromMemory(d.negativeMemories)
+	return posRate - negRate
+}
+
+func (d *dendriteMemory) maxRateFromMemory(mems [][]int64) int64 {
+	var rate int64 = 0
+	for i, mem := range mems {
+		for u := int64(0); u < d.momentLength; u++ {
+			if d.currentMoment[u] != mem[u] {
+				rate = u
+				k := d.momentLength - int64(i) + u //TODO: формула получения абсолютного значения оценки
+				if k > rate {
+					rate = k
+				}
+			}
+		}
+	}
+	return rate
 }
 
 func (d *dendriteMemory) reactionToEvent(reaction bool) {

@@ -79,7 +79,7 @@ func (a *Axon) prepareSignalDoubled(sig *Signal, level uint64) map[uint64]*Signa
 			level:  level,
 			from:   sig.from,
 			to:     ao.neuronId,
-			weigth: sig.weigth,
+			weight: sig.weight,
 		}
 		// if weigthCopy {
 		// 	s.weigth = sig.weigth
