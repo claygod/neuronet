@@ -15,11 +15,17 @@ Dendrite - вход нейрона. Отдельный для каждой св�
 type Dendrite struct {
 	neuNum int64 // номер под которым этот дендрит числится в агрегаторе
 	neuron *Neuron
+	health int64 // здоровье может каждый тик-так уменьшаться и в то же время от прохождения сигнала усиливаться или уменьшаться
 	memory *dendriteMemory
 }
 
 func (d *Dendrite) TransmitSignal(sig *Signal) {
 	//TODO: обработка, добавление в память, передача в тело нейрона
+}
+
+func (d *Dendrite) ReactionSignal(weigth int64) {
+	d.health += weigth
+	d.memory.reactionToEvent(weigth)
 }
 
 /*
@@ -81,13 +87,13 @@ func (d *dendriteMemory) maxRateFromMemory(mems [][]int64) int64 {
 	return rate
 }
 
-func (d *dendriteMemory) reactionToEvent(reaction bool, weigth int64) {
+func (d *dendriteMemory) reactionToEvent(weigth int64) {
 	d.m.Lock()
 	defer d.m.Unlock()
-	d.addMomentToList(reaction, weigth)
+	d.addMomentToList(weigth)
 }
 
-func (d *dendriteMemory) addMomentToList(reaction bool, weigth int64) {
+func (d *dendriteMemory) addMomentToList(weigth int64) {
 	// создаём копию текущего момента для добавления в долговременную память
 	mem := make([]int64, 0, d.momentLength)
 	copy(mem, d.currentMoment)
