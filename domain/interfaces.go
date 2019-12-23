@@ -43,3 +43,25 @@ type AxonInterface interface {
 	BroadcastTotal(sig *Signal) int64      // рассылка сигнала всем подключенным нейронам
 	BroadcastStochastic(sig *Signal) int64 // рассылка пустышки всем и одного случайному нейрону (из подключенных)
 }
+
+/*
+AnalysisInterface - интерфейс анализатора. За этим интерфейсом могут быть разные анализаторы.
+У анализаторов может быть своя память, в которой они сохранят образы, поледовательности и т.д.
+Однако это не MemoryInterface , т.е. этот интерфейс скорей всего не подойдёт.
+*/
+type AnalysisInterface interface {
+	MemoryResearch(curMem [][]byte) int64 // исследование текущего состояния памяти (получаемые данные менять нельзя!)
+	ForecastEstimate(weigth int64)        // оценка совпадения прогноза и результата
+	HealthCheck() int64                   // показатель здоровья
+}
+
+/*
+MemoryInterface - интерфейс хранилища памяти дендрита или нейрона или аксона.
+Можно нейрон вообще оставить организатором, а память раскидать по периферийным дендритам и аксону.
+*/
+type MemoryInterface interface {
+	//AppendSignal(sig *Signal) // добавляем новый сигнал
+	AppendData(nowData []byte) // добавляем новый сигнал
+	ActualMemory() curMem [][]byte // актуальный срез памяти
+	HealthCheck() int64       // показатель здоровья
+}
