@@ -20,19 +20,19 @@ type Axon struct {
 }
 
 func (a *Axon) signalBroadcast(sigs []*Signal) {
-	for _, sig := range sigs {
-		neu, err := a.neuronsRepo.Get(sig.to)
-		if err != nil {
-			//TODO: удалить из списка несуществующий нейрон
-			//TODO: лог ошибок return err
-		}
-		dd, err := neu.GetDendrite(sig.from)
-		if err != nil {
-			//TODO: удалить из списка несуществующую связь
-			//TODO: лог ошибок return err
-		}
-		dd.TransmitSignal(sig)
-	}
+	// for _, sig := range sigs {
+	// 	neu, err := a.neuronsRepo.Get(sig.to)
+	// 	if err != nil {
+	// 		//TODO: удалить из списка несуществующий нейрон
+	// 		//TODO: лог ошибок return err
+	// 	}
+	// 	dd, err := neu.GetDendrite(sig.from)
+	// 	if err != nil {
+	// 		//TODO: удалить из списка несуществующую связь
+	// 		//TODO: лог ошибок return err
+	// 	}
+	// 	dd.TransmitSignal(sig)
+	// }
 }
 
 /*
