@@ -1,4 +1,4 @@
-package domain
+package axon
 
 // NeuroNet
 // Axon
@@ -7,6 +7,8 @@ package domain
 import (
 	"fmt"
 	"math/rand"
+
+	"github.com/claygod/neuronet/domain"
 )
 
 /*
@@ -14,12 +16,13 @@ Axon - аксон должен реализовать стохастически
 */
 type Axon struct {
 	ownerNeuronId uint64
+	owner         domain.NeuronInterface
 	outList       []AxonOut
 	random        *rand.Rand
-	neuronsRepo   NeuronsRepo
+	neuronsRepo   *domain.NeuronsRepo
 }
 
-func (a *Axon) signalBroadcast(sigs []*Signal) {
+func (a *Axon) signalBroadcast(sigs []*domain.Signal) {
 	// for _, sig := range sigs {
 	// 	neu, err := a.neuronsRepo.Get(sig.to)
 	// 	if err != nil {
@@ -40,7 +43,7 @@ SendSignalStochasticMode - отправка сигнала одному из п�
 выбранному случайным стохастическим методом. Это может имитировать любознательность.
 Но рассылка будет всем, просто это будут пустышки. Рассылка всем нужна для синхронизации.
 */
-func (a *Axon) SendSignalStochastic(sig *Signal) error {
+func (a *Axon) SendSignalStochastic(sig *domain.Signal) error {
 	if len(a.outList) == 0 {
 		return fmt.Errorf("List of AxonOut is empty.")
 	}
@@ -61,7 +64,7 @@ func (a *Axon) SendSignalStochastic(sig *Signal) error {
 			total += ao.weigth
 		}
 		if total > rnd {
-			neuronTo = ao.neuronId
+			neuronTo = ao.neuronID
 			break
 		}
 	}
@@ -71,25 +74,26 @@ func (a *Axon) SendSignalStochastic(sig *Signal) error {
 	return nil
 }
 
-func (a *Axon) prepareSignalDoubled(sig *Signal, level uint64) map[uint64]*Signal {
-	sigList := make(map[uint64]*Signal, len(a.outList))
+func (a *Axon) prepareSignalDoubled(sig *domain.Signal, level uint64) map[uint64]*domain.Signal {
+	sigList := make(map[uint64]*domain.Signal, len(a.outList))
 	for _, ao := range a.outList {
-		s := &Signal{
-			uid:    sig.uid,
-			level:  level,
-			from:   sig.from,
-			to:     ao.neuronId,
-			weight: sig.weight,
-		}
+		s := sig.Clone()
+		// s := &domain.Signal{
+		// 	UID:    sig.UID,
+		// 	Level:  level,
+		// 	From:   sig.From,
+		// 	To:     ao.neuronID,
+		// 	Weight: sig.Weight,
+		// }
 		// if weigthCopy {
 		// 	s.weigth = sig.weigth
 		// }
-		sigList[ao.neuronId] = s
+		sigList[ao.neuronID] = s
 	}
 	return sigList
 }
 
 type AxonOut struct {
 	weigth   int64
-	neuronId uint64
+	neuronID uint64
 }

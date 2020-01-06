@@ -4,6 +4,10 @@ package domain
 // Neuron
 // Copyright © 2019 Eduard Sesigin. All rights reserved. Contacts: <claygod@yandex.ru>
 
+import (
+	"github.com/claygod/neuronet/domain"
+)
+
 /*
 Neuron - нейрон.
 Пока модель синхронная, т.к. предполагается не работа с реальным временем, а с поступающими пачками данными.
@@ -30,15 +34,15 @@ type Neuron struct {
 	id     uint64
 	health int64 // возможно здоровье по сути зависит от наличия связей, и слабые связи или отмершие связи и есть показатель смерти нейрона
 
-	dRepo DendritsRepoInterface // []DendriteInterface
-	axon  AxonInterface
+	dRepo domain.DendritsRepoInterface // []DendriteInterface
+	axon  domain.AxonInterface
 }
 
 // func (n *Neuron) GetDendrite(fromId uint64) (*Dendrite, error) {
 // 	return nil, nil //TODO:
 // }
 
-func (n *Neuron) AppendSignal(sig *Signal) { // в нейрон добавляем новый сигнал
+func (n *Neuron) AppendSignal(sig *domain.Signal) { // в нейрон добавляем новый сигнал
 	agg := n.getNewAggregator()
 	for _, dID := range n.dRepo.List() {
 		dendr, err := n.dRepo.Get(dID)
@@ -50,14 +54,14 @@ func (n *Neuron) AppendSignal(sig *Signal) { // в нейрон добавляе
 	}
 	// рассылка результата через аксон
 	newSig := sig.Clone(n, agg.Summary())
-	if newSig.weight > 777 { //TODO: пороговое значение надо будет определять f(x) функцией, и оно будет динамическим
+	if newSig.Weight > 777 { //TODO: пороговое значение надо будет определять f(x) функцией, и оно будет динамическим
 		n.axon.BroadcastTotal(newSig)
 	} else {
 		n.axon.BroadcastStochastic(newSig)
 	}
 }
 
-func (n *Neuron) ForecastEstimate(weigth int64, sig *Signal) { // оценка совпадения прогноза и результата
+func (n *Neuron) ForecastEstimate(weigth int64, sig *domain.Signal) { // оценка совпадения прогноза и результата
 }
 func (n *Neuron) NextStep() { // переход к следующему шагу (списывание здоровья на шаг и т.п.)
 }
@@ -65,6 +69,6 @@ func (n *Neuron) HealthCheck() int64 { // показатель здоровья
 	return 1 //TODO:
 }
 
-func (n *Neuron) getNewAggregator() DendriteReactionsAggregateInterface {
+func (n *Neuron) getNewAggregator() domain.DendriteReactionsAggregateInterface {
 	return nil //TODO: сделать генератор таких агрегаторов
 }

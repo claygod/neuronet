@@ -5,27 +5,31 @@ package domain
 // Copyright © 2019 Eduard Sesigin. All rights reserved. Contacts: <claygod@yandex.ru>
 
 type Signal struct {
-	uid    uint64
-	level  uint64 // нулевое значение говорит о том, что это пустышка, в остальных случаях он пробрасываясь растёт
-	from   uint64
-	to     uint64
-	parent *Signal
-	owner  *Neuron
-	weight int64 //TODO: вот тут главная кухня, надо разобраться с допустимыми значениями
+	UID    uint64
+	Level  uint64 // нулевое значение говорит о том, что это пустышка, в остальных случаях он пробрасываясь растёт
+	From   uint64
+	To     uint64
+	Parent *Signal
+	Owner  NeuronInterface
+	Weight int64 //TODO: вот тут главная кухня, надо разобраться с допустимыми значениями
 }
 
-func NewSignal(uid uint64, level uint64, parent *Signal, owner *Neuron, weight int64) *Signal {
+func NewSignal(uid uint64, level uint64, parent *Signal, owner NeuronInterface, weight int64) *Signal {
 	return &Signal{
-		uid:    uid,
-		level:  level,
-		parent: parent,
-		owner:  owner,
-		weight: weight,
+		UID:    uid,
+		Level:  level,
+		Parent: parent,
+		Owner:  owner,
+		Weight: weight,
 	}
 }
 
-func (s *Signal) Clone(owner *Neuron, weight int64) *Signal {
-	return NewSignal(s.uid, s.level+1, s, owner, weight) //TODO:
+func (s *Signal) CreateChild(owner NeuronInterface, weight int64) *Signal {
+	return NewSignal(s.UID, s.Level+1, s, owner, weight) //TODO:
+}
+
+func (s *Signal) Clone() *Signal {
+	return NewSignal(s.UID, s.Level, s.Parent, s.Owner, s.Weight) //TODO: это для аксона
 }
 
 type SignalAggregator struct {

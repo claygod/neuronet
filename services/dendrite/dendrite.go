@@ -6,6 +6,8 @@ package domain
 
 import (
 	"sync"
+
+	"github.com/claygod/neuronet/domain"
 )
 
 /*
@@ -15,13 +17,13 @@ Dendrite - вход нейрона. Отдельный для каждой св�
 */
 type Dendrite struct {
 	neuNum       int64 // номер под которым этот дендрит числится в агрегаторе нейрона
-	neuron       *Neuron
+	neuron       domain.NeuronInterface
 	health       int64 // здоровье может каждый тик-так уменьшаться и в то же время от прохождения сигнала усиливаться или уменьшаться
 	detailMemory *detailMemory
 	simpleMemory *simpleMemory
 }
 
-func (d *Dendrite) TransmitSignal(sig *Signal) {
+func (d *Dendrite) TransmitSignal(sig *domain.Signal) {
 	//TODO: обработка, добавление в память, передача в тело нейрона
 }
 
