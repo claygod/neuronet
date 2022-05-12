@@ -22,4 +22,9 @@ type Task struct {
 	State       uint64 // состояние, возможно будет каждый раз пересчитываться (получать через метод)
 	ParentTasks []*Task
 	ChildTasks  []*Task
+	// TODO: Target
+}
+
+type TaskCompletionCheck interface {
+	Check(*Task) float64 // оценка скорей всего от 0.0 до 1.0
 }
