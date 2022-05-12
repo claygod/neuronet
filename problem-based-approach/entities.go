@@ -1,7 +1,7 @@
 package problembasedapproach
 
 // Problem-based approach
-// Copyright © 2022 Eduard Sesigin. All rights reserved. Contacts: <claygod@yandex.ru>
+// Copyright © 2021-2022 Eduard Sesigin. All rights reserved. Contacts: <claygod@yandex.ru>
 
 /*
 Need - потребность
