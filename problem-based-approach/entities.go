@@ -1,7 +1,5 @@
 package problembasedapproach
 
-import "sync"
-
 // Problem-based approach
 // Copyright © 2021-2022 Eduard Sesigin. All rights reserved. Contacts: <claygod@yandex.ru>
 
@@ -21,40 +19,16 @@ Task - задача
 */
 type Task struct {
 	ID          string
-	State       uint64 // состояние, возможно будет каждый раз пересчитываться (получать через метод)
+	CurState    *State
+	TargetState *State
 	ParentTasks []*Task
 	ChildTasks  []*Task
-	// TODO: Target
+	// TODO: scope - контекст задачи. Возможно скоп, он подобен State (допустим это стартовый стейт при решении задачи).
+	// Также возможно, что скоп снаружи, и возможный для использования генератор Chainlet-наборов уже относится к какому-то скопу).
 }
 
 type TaskCompletionCheck interface {
-	Check(*Task) float64 // оценка скорей всего от 0.0 до 1.0
-}
-
-type Chainlet struct { // цепочка действий имеющая удовленворяющий результат (смысл)
-	//ID uint64 // возможно снаружи
-	// Rate float64
-	Chain []uint64 // храним идентификаторы а не ссылки чтобы сравнивать цепочки на похожесть
-}
-
-func NewChainlet() *Chainlet {
-	return &Chainlet{
-		Chain: make([]uint64, 0),
-	}
-}
-
-func (c *Chainlet) Add(chID uint64) {
-	c.Chain = append(c.Chain, chID)
-}
-
-type ChainletContainer struct { // цепочка действий имеющая удовленворяющий результат (смысл)
-	// ID uint64 // возможно снаружи
-	Rate     float64
-	Chainlet *Chainlet
-}
-
-type ChainletRepo interface { // репо атомиков
-	SetNewChainlet(*Chainlet) (ID uint64)
+	Check(*Task, *Task) float64 // оценка скорей всего от 0.0 до 1.0
 }
 
 type AtomicChanger interface { // минимальное атомарное изменение
@@ -62,7 +36,16 @@ type AtomicChanger interface { // минимальное атомарное из
 }
 
 type AtomicChangerRepo interface { // репо атомиков
+	/*
+	   GetRandom - берём случайную, это удобно для генерации случайного Chainlet-набора
+	*/
 	GetRandom() (ID uint64, aChanger AtomicChanger)
+
+	/*
+		SetRandom - сначала добавляем действительно базовые возможности, а потом можно добавлять
+		Chainlet-наборы, которые используются часто или которыекороткие но эффективные
+	*/
+	SetRandom(aChanger AtomicChanger) (ID uint64)
 }
 
 type StateComparer interface { // сравниваем состояния (направление и координаты)
@@ -73,55 +56,14 @@ type State struct {
 	// vector - coord. and direct
 }
 
-type ChainletGenerator struct {
-	MaxChainletLenght int
-	MaxVersionsCount  int
-	// TODO: Parallelism
-	ChangersRepo AtomicChangerRepo
-	Comparer     StateComparer
-}
-
-func (c *ChainletGenerator) GenChainlets(maxSimilarity float64, minSimilarity float64, curState *State, targetState *State) []*ChainletContainer {
-	wg := sync.WaitGroup{}
-	wg.Add(c.MaxVersionsCount)
-
-	out := make([]*ChainletContainer, c.MaxVersionsCount)
-
-	for i := 0; i < c.MaxVersionsCount; i++ {
-		num := i
-
-		go func() {
-			out[num] = c.GenChainlet(maxSimilarity, curState, targetState)
-
-			wg.Done()
-		}()
-	}
-
-	wg.Wait()
-
-	// TODO: тут сортируем и обрезаем по minSimilarity
-
-	return out
-}
-
 /*
-GenChainlet - генерируем цепочку.
+TaskResource -  учёт ресурсов, выделенных для решения задачи, обычно ресурсы только тратятся,
+но при каких-то определённых обстоятельствах ресурсы могут и повышаться
+(например найден Chainlet, достойный добавление в репо Changer-атомиков.
 */
-func (c *ChainletGenerator) GenChainlet(maxSimilarity float64, curState *State, targetState *State) *ChainletContainer {
-	out := &ChainletContainer{
-		Rate:     0.0,
-		Chainlet: NewChainlet(),
-	}
-
-	for i := 0; i < c.MaxChainletLenght; i++ {
-		chID, chGer := c.ChangersRepo.GetRandom()
-		out.Chainlet.Add(chID)
-		curState = chGer.Change(curState)
-
-		if out.Rate = c.Comparer.Comparison(curState, targetState); out.Rate >= maxSimilarity {
-			break
-		}
-	}
-
-	return out
+type TaskResource interface { // NOTE: возможно тут потребуются float
+	Add(int64) int64
+	Cut(int64) int64
+	Total() int64
+	ResetToZero() // напоминание о том, что у задачи может оказаться ситуация, когда точно надо остановить поиски путей (Chainlet) её выполнения
 }
