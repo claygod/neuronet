@@ -1,6 +1,9 @@
 package problembasedapproach
 
-import "sync"
+import (
+	"sort"
+	"sync"
+)
 
 // Problem-based approach
 // Chainlet entities
@@ -29,6 +32,10 @@ type ChainletContainer struct {
 	// ID uint64 // возможно снаружи
 	Rate     float64 // исчисляется исходя не только из коэффициэнта сравнения state, но и длины цепочки (количества действий)
 	Chainlet *Chainlet
+}
+
+func MergeChainletContainers(c1 *ChainletContainer, c2 *ChainletContainer) *ChainletContainer { // возвращаем НОВЫЙ экземпляр!
+	return nil // TODO: нужна реализация
 }
 
 type ChainletRepo interface { // репо цепочек
@@ -64,7 +71,19 @@ func (c *ChainletGenerator) GenChainlets(maxSimilarity float64, minSimilarity fl
 
 	wg.Wait()
 
-	// TODO: тут сортируем и обрезаем по minSimilarity
+	// сортируем и обрезаем по minSimilarity
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].Rate < out[j].Rate
+	})
+
+	// обрезаем по minSimilarity
+	for i, chCon := range out {
+		if chCon.Rate < minSimilarity {
+			out = out[:i]
+
+			break
+		}
+	}
 
 	return out
 }
