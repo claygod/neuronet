@@ -1,6 +1,7 @@
 package problembasedapproach
 
 // Problem-based approach
+// Entities
 // Copyright © 2021-2022 Eduard Sesigin. All rights reserved. Contacts: <claygod@yandex.ru>
 
 /*

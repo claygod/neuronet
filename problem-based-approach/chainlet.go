@@ -1,13 +1,13 @@
 package problembasedapproach
 
+// Problem-based approach
+// Chainlet
+// Copyright © 2021-2022 Eduard Sesigin. All rights reserved. Contacts: <claygod@yandex.ru>
+
 import (
 	"sort"
 	"sync"
 )
-
-// Problem-based approach
-// Chainlet entities
-// Copyright © 2021-2022 Eduard Sesigin. All rights reserved. Contacts: <claygod@yandex.ru>
 
 type Chainlet struct { // цепочка действий имеющая удовленворяющий результат (смысл)
 	//ID uint64 // возможно снаружи
