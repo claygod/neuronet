@@ -25,6 +25,10 @@ func (c *Chainlet) Add(chID uint64) {
 	c.Chain = append(c.Chain, chID)
 }
 
+func (c *Chainlet) MergeChainlet(ch *Chainlet) {
+	c.Chain = append(c.Chain, ch.Chain...)
+}
+
 /*
 hainletContainer - контейнер нужен для того, чтобы иметь возможность сравнить
 */
@@ -35,11 +39,28 @@ type ChainletContainer struct {
 }
 
 func MergeChainletContainers(c1 *ChainletContainer, c2 *ChainletContainer) *ChainletContainer { // возвращаем НОВЫЙ экземпляр!
-	return nil // TODO: нужна реализация
+	chOut := append(c1.Chainlet.Chain, c2.Chainlet.Chain...)
+
+	chLetOut := &Chainlet{
+		Chain: chOut,
+	}
+
+	out := &ChainletContainer{
+		Rate:     rateCalc.CalcRate(chLetOut),
+		Chainlet: chLetOut,
+	}
+
+	return out // TODO: реализация возможно упрощена, можно будет доработать
 }
 
 type ChainletRepo interface { // репо цепочек
 	SetNewChainlet(*Chainlet) (ID uint64)
+}
+
+var rateCalc CalcChainletRate // TODO: пока проще сделать автономной сущностью, для которой потом найду место
+
+type CalcChainletRate interface {
+	CalcRate(*Chainlet) float64
 }
 
 /*
