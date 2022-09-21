@@ -23,8 +23,14 @@ type Task struct {
 	maxSimilarity float64
 	minSimilarity float64
 
-	recursionLevel   int
-	findDirectsCount int
+	/* пояснение к нижележащим переменными:
+	   мы генерируем findDirectsCount промежуточных целей, т.е. точек, церез которые попробуем найти путь к главной цели.
+	   Напиример, рекурсия у нас 2 а каунт 5. Тогда мы генерируем 5 точек-целей, если из какой-то находим путь к главной цели,
+	   то ура, всё ок, если нет, то из каждой из пяти чертим пять линий к новосгенерированнм пяти,
+	   т.е. на втором уровне 25 промежуточных целей, из которых мы пытаемся дойти до главной цели
+	*/
+	recursionLevel   int // количество рекурсий по поиску промежуточных шагов (поиск пути), т.е. количество промежуточных шагов в неких направлениях
+	findDirectsCount int // в одной рекурсии количество
 
 	beginState  *State
 	curState    *State
@@ -41,6 +47,64 @@ type Task struct {
 	ChildTasks  []*Task
 	// TODO: scope - контекст задачи. Возможно скоп, он подобен State (допустим это стартовый стейт при решении задачи).
 	// Также возможно, что скоп снаружи, и возможный для использования генератор Chainlet-наборов уже относится к какому-то скопу).
+}
+
+func NewTask(
+	ID string,
+	maxSimilarity float64,
+	minSimilarity float64,
+	recursionLevel int,
+	findDirectsCount int,
+
+	beginState *State,
+	curState *State,
+	targetState *State,
+
+	chlGen *ChainletGenerator,
+	rStateGen IntermediateRandomStateGenerator,
+	sComparer StateComparer,
+) *Task { // TODO: доделать заполнение всех полей
+	return &Task{
+		ID:               ID,
+		maxSimilarity:    maxSimilarity,
+		minSimilarity:    minSimilarity,
+		recursionLevel:   recursionLevel,
+		findDirectsCount: findDirectsCount,
+
+		beginState:  beginState,
+		curState:    curState,
+		targetState: targetState,
+
+		chlGen:    chlGen,
+		rStateGen: rStateGen,
+		sComparer: sComparer,
+
+		Steps:       make([]*ChainletContainer, 0),
+		ParentTasks: make([]*Task, 0),
+		ChildTasks:  make([]*Task, 0),
+	}
+}
+
+func (t *Task) Copy() *Task {
+	return &Task{
+		ID:               t.ID,
+		maxSimilarity:    t.maxSimilarity,
+		minSimilarity:    t.minSimilarity,
+		recursionLevel:   t.recursionLevel,
+		findDirectsCount: t.findDirectsCount,
+
+		beginState:  t.beginState,
+		curState:    t.curState,
+		targetState: t.targetState,
+
+		chlGen:    t.chlGen,
+		rStateGen: t.rStateGen,
+		sComparer: t.sComparer,
+
+		Steps:       make([]*ChainletContainer, 0), // TODO: пока слайсы не копируем, не знаем, надо ли
+		ParentTasks: make([]*Task, 0),
+		ChildTasks:  make([]*Task, 0),
+	}
 }
 
 func (t *Task) FindChainlets() []*ChainletContainer { // тут мы ищем оптимальный путь
