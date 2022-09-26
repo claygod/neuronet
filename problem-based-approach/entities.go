@@ -41,10 +41,10 @@ type Task struct {
 	sComparer StateComparer
 
 	// Шаги, ведущие к цели
-	Steps []*ChainletContainer
+	// Steps []*ChainletContainer
 
-	ParentTasks []*Task
-	ChildTasks  []*Task
+	//ParentTasks []*Task
+	//ChildTasks  []*Task
 	// TODO: scope - контекст задачи. Возможно скоп, он подобен State (допустим это стартовый стейт при решении задачи).
 	// Также возможно, что скоп снаружи, и возможный для использования генератор Chainlet-наборов уже относится к какому-то скопу).
 }
@@ -79,9 +79,9 @@ func NewTask(
 		rStateGen: rStateGen,
 		sComparer: sComparer,
 
-		Steps:       make([]*ChainletContainer, 0),
-		ParentTasks: make([]*Task, 0),
-		ChildTasks:  make([]*Task, 0),
+		// Steps:       make([]*ChainletContainer, 0),
+		//ParentTasks: make([]*Task, 0),
+		//ChildTasks:  make([]*Task, 0),
 	}
 }
 
@@ -101,9 +101,9 @@ func (t *Task) Copy() *Task {
 		rStateGen: t.rStateGen,
 		sComparer: t.sComparer,
 
-		Steps:       make([]*ChainletContainer, 0), // TODO: пока слайсы не копируем, не знаем, надо ли
-		ParentTasks: make([]*Task, 0),
-		ChildTasks:  make([]*Task, 0),
+		// Steps:       make([]*ChainletContainer, 0), // TODO: пока слайсы не копируем, не знаем, надо ли
+		//ParentTasks: make([]*Task, 0),
+		//ChildTasks:  make([]*Task, 0),
 	}
 }
 
@@ -111,7 +111,6 @@ func (t *Task) FindChainlets() []*ChainletContainer { // тут мы ищем о
 	decisions := t.chlGen.GenChainlets(t.maxSimilarity, t.minSimilarity, t.curState, t.targetState)
 
 	if len(decisions) == 0 && t.recursionLevel > 0 { // не найдено подходящих решений и ещё можно создавать промежуточные шаги
-		// TODO:
 		// генерируем новые (промежуточные) цели, которых можем добиться
 		// и уже в каждой точке промежуточных целей пробуем заново добиться основной цели
 		// (действуем рекурсивно)
@@ -119,23 +118,13 @@ func (t *Task) FindChainlets() []*ChainletContainer { // тут мы ищем о
 		for i := 0; i < t.findDirectsCount; i++ {
 			newState := t.rStateGen.GenTask(t.curState, t.targetState, t.sComparer)
 
-			newTask := &Task{ // TODO: сделать через NewTask с заполнением всех полей
-				recursionLevel: t.recursionLevel - 1,
-
-				beginState:  t.beginState,
-				curState:    t.curState,
-				targetState: newState,
-			}
+			newTask := t.Copy()
+			newTask.recursionLevel = t.recursionLevel - 1
+			newTask.curState = newState
 
 			for _, dt := range newTask.FindChainlets() { // это получаем результаты к промежуточной цели
-
-				newTask2 := &Task{ // TODO: сделать через NewTask с заполнением всех полей
-					recursionLevel: t.recursionLevel - 2,
-
-					beginState:  t.beginState,
-					curState:    newState,
-					targetState: t.targetState,
-				}
+				newTask2 := newTask.Copy()
+				newTask2.recursionLevel = t.recursionLevel - 2
 
 				for _, dt2 := range newTask2.FindChainlets() { // теперь из промежуточной точки пытамся добраться до основной цели
 					decisions = append(decisions, MergeChainletContainers(dt, dt2))
